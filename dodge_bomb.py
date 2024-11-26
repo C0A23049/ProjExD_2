@@ -30,6 +30,10 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
 
 
 def gameover(screen: pg.Surface) -> None:
+    """
+    GameOverと表示する関数
+    戻り値：GameOverの画面
+    """
     #画面をブラックアウトさせる
     bo = pg.Surface((WIDTH, HEIGHT)) #黒いSurfaceを生成
     pg.draw.rect(bo, (0, 0, 0), [0, 0, WIDTH, HEIGHT]) #画面を真っ黒にする
