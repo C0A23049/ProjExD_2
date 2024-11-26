@@ -49,6 +49,23 @@ def gameover(screen: pg.Surface) -> None:
     time.sleep(5) #5秒待つ
     return
 
+
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    サイズの異なる爆弾Surfaceを要素としたリストと加速度リストを返す
+    戻り値:
+        - 爆弾Surfaceのリスト
+        - 加速度（倍率）のリスト
+    """
+    bb_imgs = []  # サイズが異なる爆弾のリスト
+    bb_accs = [a for a in range(1, 11)]  # 加速度倍率のリスト
+    for r in range(1, 11):  # 爆弾サイズ用意
+        bb_img = pg.Surface((20 * r, 20 * r), pg.SRCALPHA)  # Surface
+        pg.draw.circle(bb_img, (255, 0, 0), (10 * r, 10 * r), 10 * r)  # 爆弾を描画
+        bb_imgs.append(bb_img)  # リストに追加
+    return bb_imgs, bb_accs
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -56,11 +73,9 @@ def main():
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 20
-    bb_img = pg.Surface((20, 20))  # 爆弾用の空Surface
-    pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)  # 赤円描く
-    bb_img.set_colorkey((0, 0, 0))  # 爆弾四隅消す
-    bb_rct = bb_img.get_rect()  # 爆弾rectセット
-    bb_rct.center = random.randint(0,WIDTH), random.randint(0,HEIGHT)
+    bb_imgs, bb_accs = init_bb_imgs()  # 爆弾リストと加速度リストの初期化
+    bb_rct = bb_imgs[0].get_rect()  # 初期爆弾のRectを設定
+    bb_rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
     vx, vy = +5, +5
     clock = pg.time.Clock()
     tmr = 0
@@ -84,6 +99,12 @@ def main():
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         bb_rct.move_ip(vx,vy)
+        # 爆弾の状態更新
+        level = min(tmr // 500, 9)  # 爆弾の成長段階
+        avx = vx * bb_accs[level]  # 加速度を適用
+        avy = vy * bb_accs[level]
+        bb_img = bb_imgs[level]  # 爆弾のサイズを変更
+        bb_rct.move_ip(avx, avy)
         yoko, tate = check_bound(bb_rct)
         if not yoko:
             vx *= -1
