@@ -43,7 +43,6 @@ def gameover(screen: pg.Surface) -> None:
     #画像を描画
     kk_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 0.9)  # 工科トン読み込み
     screen.blit(kk_img, [WIDTH//2-200-50, HEIGHT//2-50])  # 工科とん描画
-    kk_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 0.9)
     screen.blit(kk_img, [WIDTH//2+190, HEIGHT//2-50])
 
     pg.display.update() #画面を更新
