@@ -66,11 +66,38 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
     return bb_imgs, bb_accs
 
 
+def get_kk_img(sum_mv: tuple[int, int]) -> pg.Surface:
+    """
+    移動量の合計値タプルに対応する向きの画像Surfaceを返す
+    引数:
+        sum_mv: 移動量の合計値タプル (x方向, y方向)
+    戻り値:
+        指定された方向の画像Surface
+    """
+    # 向きに応じた画像辞書の準備
+    kk_img = pg.image.load("fig/3.png")
+    kk_imgs = {
+        (0, 0): pg.transform.rotozoom(kk_img, 0, 0.9),  # 静止時の画像
+        (0, -5): pg.transform.rotozoom(kk_img, -90, 0.9),  # 上方向
+        (0, +5): pg.transform.rotozoom(kk_img, 90, 0.9),  # 下方向
+        (-5, 0): pg.transform.rotozoom(kk_img, 0, 0.9),  # 左方向
+        (+5, 0): pg.transform.rotozoom(kk_img, 180, 0.9),  # 右方向
+        (-5, -5): pg.transform.rotozoom(kk_img, -135, 0.9),  # 左上
+        (-5, +5): pg.transform.rotozoom(kk_img, -45, 0.9),  # 左下
+        (+5, -5): pg.transform.rotozoom(kk_img, 135, 0.9),  # 右上
+        (+5, +5): pg.transform.rotozoom(kk_img, 45, 0.9),  # 右下
+    }
+
+    
+    # 該当する画像を返す（該当なしの場合は静止画像）
+    return kk_imgs.get(sum_mv, kk_imgs[(0, 0)])
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("fig/pg_bg.jpg")    
-    kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
+    kk_img = get_kk_img((0, 0))  # 初期画像を静止状態に設定
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 20
     bb_imgs, bb_accs = init_bb_imgs()  # 爆弾リストと加速度リストの初期化
@@ -94,16 +121,21 @@ def main():
             if key_lst[key]:
                 sum_mv[0] += tpl[0]
                 sum_mv[1] += tpl[1]
+        
+        # こうかとんの画像を移動量に応じて更新
+        kk_img = get_kk_img(tuple(sum_mv))
 
         kk_rct.move_ip(sum_mv)
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         bb_rct.move_ip(vx,vy)
         # 爆弾の状態更新
+        
         avx = vx * bb_accs[min(tmr // 500, 9)]  # 加速度を適用
         avy = vy * bb_accs[min(tmr // 500, 9)]
         bb_img = bb_imgs[min(tmr // 500, 9)]  # 爆弾のサイズを変更
         bb_rct.move_ip(avx, avy)
+        bb_rct.width, bb_rct.height = bb_img.get_size()  # 爆弾のRectを更新
         yoko, tate = check_bound(bb_rct)
         if not yoko:
             vx *= -1
