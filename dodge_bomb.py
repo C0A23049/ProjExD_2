@@ -100,10 +100,9 @@ def main():
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         bb_rct.move_ip(vx,vy)
         # 爆弾の状態更新
-        level = min(tmr // 500, 9)  # 爆弾の成長段階
-        avx = vx * bb_accs[level]  # 加速度を適用
-        avy = vy * bb_accs[level]
-        bb_img = bb_imgs[level]  # 爆弾のサイズを変更
+        avx = vx * bb_accs[min(tmr // 500, 9)]  # 加速度を適用
+        avy = vy * bb_accs[min(tmr // 500, 9)]
+        bb_img = bb_imgs[min(tmr // 500, 9)]  # 爆弾のサイズを変更
         bb_rct.move_ip(avx, avy)
         yoko, tate = check_bound(bb_rct)
         if not yoko:
